@@ -6,18 +6,11 @@ from database import engine, Base
 from database import SessionLocal
 import models
 import auth
+from database import get_db
+from auth import get_current_user
+
 
 Base.metadata.create_all(bind=engine)
-
-# Open a session, "lends" it to the road that needs it,
-# and then automatically closes it afterward, whether the request succeeded or failed.
-def get_db():
-    db =SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 # A basic API Instance
 app = FastAPI()
@@ -51,6 +44,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     return db_user
 
+
 @app.post("/login")
 def login(user:  schemas.UserCreate, db: Session = Depends(get_db)):
     db_user =  db.query(models.User).filter(models.User.email == user.email).first()
@@ -60,3 +54,8 @@ def login(user:  schemas.UserCreate, db: Session = Depends(get_db)):
 
     access_token = auth.create_access_token(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/me", response_model = schemas.UserResponse)
+def read_current_user(current_user: models.User = Depends(get_current_user)):
+    return current_user
