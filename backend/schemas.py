@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 
-# A class Item that inherits from BaseModel
 class ItemCreate(BaseModel):
     name: str
     description : str = "A description for the item"
@@ -12,6 +11,17 @@ class ItemResponse(BaseModel):
     name: str
     description : str = "A description for the item"
     price: float
+
+    class Config:
+        from_attributes = True
+
+class UserCreate(BaseModel):
+    email: str
+    password : str
+
+class UserResponse(BaseModel):
+    id : int
+    email: str
 
     class Config:
         from_attributes = True
